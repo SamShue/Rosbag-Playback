@@ -2,9 +2,27 @@ clc;
 clear all;
 close all;
 
+% Import custom ROS messages
+%==========================================================================
+% To use the custom messages, follow these steps:
+% 1. Edit javaclasspath.txt, add the following file locations as new lines, and save the file:
+%   C:\Users\evilr\Documents\GitHub\RosbagPlayback\custom_messages\matlab_gen\jar\pozyx_ros_examples-0.1.0.jar
+% 2. Add the custom message folder to the MATLAB path by executing:
+%   addpath('C:\Users\evilr\Documents\GitHub\RosbagPlayback\custom_messages\matlab_gen\msggen')
+%   savepath
+% 3. Restart MATLAB and verify that you can use the custom messages. 
+% Type "rosmsg list" and ensure that the output contains the generated custom message types.
+
+folderpath = 'custom_messages';
+rosgenmsg(folderpath);
+% End import custom ROS messages
+%-------------------------------------------------------------------------
+
 filename = '2019-05-21-18-51-45.bag';
 
 bag = rosbag(filename);
+
+msgs = readMessages(bag);
 
 % get odom
 bagSelect = select(bag,'Topic','/odom');
