@@ -32,11 +32,7 @@ msgTable = bag.MessageList;
 %==========================================================================
 % iterate through all messages in bag
 for ii = 1:length(msgs)
-    % get timestamp of current message (not included in msg struct for some
-    % reason)
-    messageTimeStamp = table2array(msgTable(ii,1));
-    
-    
+    messageTimeStamp = table2array(
     
     % Plot odom
     %======================================================================
@@ -50,7 +46,8 @@ end
 
 % Plot results
 %==========================================================================
-plotOdomPath(bag);
-plotTwistPath(bag);
+plotOdomPath(msgs);
 % End plot results
 %--------------------------------------------------------------------------
+
+
