@@ -2,7 +2,7 @@ package pozyx_ros_examples;
 
 public interface DeviceRange extends org.ros.internal.message.Message {
   static final java.lang.String _TYPE = "pozyx_ros_examples/DeviceRange";
-  static final java.lang.String _DEFINITION = "uint32 timestamp\nuint32 distance\nint16 RSS\nstring device\n";
+  static final java.lang.String _DEFINITION = "uint32 timestamp\r\nuint32 distance\r\nint16 RSS\r\nstring device\r\n";
   static final boolean _IS_SERVICE = false;
   static final boolean _IS_ACTION = false;
   int getTimestamp();

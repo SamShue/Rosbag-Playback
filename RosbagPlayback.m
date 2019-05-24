@@ -27,7 +27,6 @@ bag = rosbag(filename);
 msgs = readMessages(bag);
 msgTable = bag.MessageList;
 
-
 % Rosbag playback
 %==========================================================================
 % iterate through all messages in bag
