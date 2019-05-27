@@ -8,7 +8,7 @@ classdef nodepf
     end
     
     methods
-        function obj = nodepf(numParticles, range_m)
+        function obj = nodepf(numParticles, robotPosX, robotPosY, range_m)
             %NODEPF Construct an instance of this class
             %   Detailed explanation goes here
             obj.numParticles = numParticles;
