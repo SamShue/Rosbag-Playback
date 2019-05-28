@@ -7,6 +7,8 @@ classdef nodepf < handle
         particles;
         color = 'red';
         addr;
+        lastRobotPosition;
+        minResampleDistance = 0.5;
         
         nodeStdDev_m = 0.5;
     end
@@ -16,6 +18,13 @@ classdef nodepf < handle
             %NODEPF Construct an instance of this class
             %   Detailed explanation goes here
             obj.addr = addr;
+            if(strcmp(addr, '26965'))
+                obj.color = 'blue';
+            elseif(strcmp(addr, '26933'))
+                obj.color = 'red';
+            elseif(strcmp(addr, '26935'))
+                obj.color = 'yellow';
+            end
             
             obj.numParticles = numParticles;
             
@@ -30,32 +39,41 @@ classdef nodepf < handle
             end
             
             obj.particles = particles;
+            obj.lastRobotPosition = [robotPosX, robotPosY];
         end
         
-        function outputArg = predict(obj, motion)
-            
+        function predict(obj, motion)
+            % Empty function; nodes do not move, nothing to update
         end
         
-        function outputArg = resample(obj, robotPosX, robotPosY, range_m)
-            % Get expected range values for each particle
-            err = zeros(length(obj.numParticles));
-            for ii = 1:obj.numParticles
-                x = obj.particles(ii,1) - robotPosX;
-                y = obj.particles(ii,2) - robotPosY;
-                expectedRange = sqrt(x^2 + y^2);
-                err(ii) = abs(expectedRange - range_m);
+        function resample(obj, robotPosX, robotPosY, range_m)
+            % Check to see if robot has moved enough to warrant resampling
+            if(abs(norm([robotPosX, robotPosY] - obj.lastRobotPosition)) > obj.minResampleDistance)
+                % Get expected range values for each particle
+                err = zeros(length(obj.numParticles));
+                for ii = 1:obj.numParticles
+                    x = obj.particles(ii,1) - robotPosX;
+                    y = obj.particles(ii,2) - robotPosY;
+                    expectedRange = sqrt(x^2 + y^2);
+                    err(ii) = abs(expectedRange - range_m);
+                end
+                
+                norm_err = abs(err - max(err));
+                weights = norm_err./sum(norm_err);
+                
+                newParticles = zeros(obj.numParticles, 2);
+                for ii = 1:obj.numParticles
+                    newParticles(ii,:) = obj.particles(RandFromDist(weights),:);
+                    % Add noise to resampled particles
+                    newParticles(ii,1) = newParticles(ii,1) + normrnd(0, 0.1);
+                    newParticles(ii,2) = newParticles(ii,2) + normrnd(0, 0.1);
+                end
+                
+                % Replace old particle set
+                obj.particles = newParticles;
+                % Update last robot position
+                obj.lastRobotPosition = [robotPosX, robotPosY];
             end
-            
-            norm_err = abs(err - max(err));
-            weights = norm_err./sum(norm_err);
-            
-            newParticles = zeros(obj.numParticles, 2);
-            for ii = 1:obj.numParticles
-                newParticles(ii,:) = obj.particles(RandFromDist(weights),:);
-            end
-            
-            % Replace old particle set
-            obj.particles = newParticles;
         end
         
         function plotParticles(obj)

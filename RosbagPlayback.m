@@ -27,7 +27,8 @@ bag = rosbag(filename);
 msgs = readMessages(bag);
 msgTable = bag.MessageList;
 
-pose = [0,0,0];
+numParticles = 100;
+odomPose = [0,0,0];
 node = [];
 
 % Rosbag playback
@@ -40,21 +41,21 @@ for ii = 1:length(msgs)
     
     if(contains(msgs{ii,1}.MessageType, 'DeviceRange'))
         if(isempty(node))
-            node = [node, nodepf(msgs{ii,1}.Device, 100, pose(1), pose(2), double(msgs{ii,1}.Distance)/1000)];
+            node = [node, nodepf(msgs{ii,1}.Device, numParticles, odomPose(1), odomPose(2), double(msgs{ii,1}.Distance)/1000)];
         else
             found = 0;
             for jj = 1:length(node)
-                if(contains(node(jj).addr, msgs{ii,1}.Device))
+                if(strcmp(node(jj).addr, msgs{ii,1}.Device))
                     % Update existing pf
-                    node(jj).resample(pose(1), pose(2), double(msgs{ii,1}.Distance)/1000);
+                    node(jj).resample(odomPose(1), odomPose(2), double(msgs{ii,1}.Distance)/1000);
                     found = 1;
                 end
             end
             
-            %             if(found == 0)
-            %                 % no matching addr found, append new pf
-            %                 node = [node, nodepf(msgs{ii,1}.Device, 100, pose(1), pose(2), msgs{ii,1}.Distance/100)];
-            %             end
+            if(found == 0)
+                % no matching addr found, append new pf
+                node = [node, nodepf(msgs{ii,1}.Device, numParticles, odomPose(1), odomPose(2), double(msgs{ii,1}.Distance)/1000)];
+            end
         end
     end
     
@@ -68,17 +69,18 @@ for ii = 1:length(msgs)
         orientation(4) = msgs{ii,1}.Pose.Pose.Orientation.Z;
         % convert quaternions to eulter angels (quat2eul format: WXYZ -> ZXY)
         orientation = quat2eul(orientation);
-        pose = [position(1), position(2), wrapTo360(rad2deg(orientation(1)))];
+        odomPose = [position(1), position(2), wrapTo360(rad2deg(orientation(1)))];
     end
     
     % Render environment
     %======================================================================
-    if(mod(ii, 100) == 0) % render every 100 messages
+    if(mod(ii, 500) == 0) % render every 100 messages
         clf;
         hold on;
+        title(sprintf('Iteration %d', ii));
         xlim([-5 5]); ylim([-5 5]);
         xlabel('meters'); ylabel('meters');
-        drawRobot(pose(1), pose(2), pose(3), 0.25);
+        drawRobot(odomPose(1), odomPose(2), odomPose(3), 0.25);
         if(~isempty(node))
             for jj = 1:length(node)
                 node(jj).plotParticles();
