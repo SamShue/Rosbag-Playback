@@ -1,6 +1,5 @@
 function plotOdom(msg)
 if(contains(msg.MessageType,'Odom'))
-    hold off;
     % get pose from odom message
     position(1) = msg.Pose.Pose.Position.X;
     position(2) = msg.Pose.Pose.Position.Y;

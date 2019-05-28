@@ -6,21 +6,24 @@ classdef nodepf
         numParticles;
         particles;
         color = 'red';
+        addr;
         
-        nodeStdDev_m = 1;
+        nodeStdDev_m = 0.5;
     end
     
     methods
-        function obj = nodepf(numParticles, robotPosX, robotPosY, range_m)
+        function obj = nodepf(addr, numParticles, robotPosX, robotPosY, range_m)
             %NODEPF Construct an instance of this class
             %   Detailed explanation goes here
+            obj.addr = addr;
+            
             obj.numParticles = numParticles;
             
             particles = zeros(numParticles, 2);
             % Generate Particles
             for ii = 1:numParticles
                 orientation = rand() * 360;
-                noise = normrnd(0, nodeStdDev_m);
+                noise = normrnd(0, obj.nodeStdDev_m);
                 x = cosd(orientation)*(range_m + noise);
                 y = sind(orientation)*(range_m + noise);
                 particles(ii,:) = [x, y];
@@ -34,7 +37,25 @@ classdef nodepf
         end
         
         function outputArg = resample(obj, robotPosX, robotPosY, range_m)
+            % Get expected range values for each particle
+            err = zeros(length(obj.numParticles));
+            for ii = 1:obj.numParticles
+                x = obj.particles(ii,1) - robotPosX;
+                y = obj.particles(ii,2) - robotPosY;
+                expectedRange = sqrt(x^2 + y^2);
+                err(ii) = abs(expectedRange - range_m);
+            end
             
+            weights = err./max(err);
+            dist = 1 - weights;
+            
+            newParticles = zeros(obj.numParticles, 2);
+            for ii = 1:obj.numParticles
+                newParticles(ii,:) = obj.particles(RandFromDist(dist),:);
+            end
+            
+            % Replace old particle set
+            obj.particles = newParticles;
         end
         
         function plotParticles(obj)
