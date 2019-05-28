@@ -1,4 +1,4 @@
-classdef nodepf
+classdef nodepf < handle
     %NODEPF Summary of this class goes here
     %   Detailed explanation goes here
     
@@ -46,12 +46,12 @@ classdef nodepf
                 err(ii) = abs(expectedRange - range_m);
             end
             
-            weights = err./max(err);
-            dist = 1 - weights;
+            norm_err = abs(err - max(err));
+            weights = norm_err./sum(norm_err);
             
             newParticles = zeros(obj.numParticles, 2);
             for ii = 1:obj.numParticles
-                newParticles(ii,:) = obj.particles(RandFromDist(dist),:);
+                newParticles(ii,:) = obj.particles(RandFromDist(weights),:);
             end
             
             % Replace old particle set

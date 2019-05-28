@@ -46,7 +46,7 @@ for ii = 1:length(msgs)
             for jj = 1:length(node)
                 if(contains(node(jj).addr, msgs{ii,1}.Device))
                     % Update existing pf
-%                     node(jj).resample(pose(1), pose(2), double(msgs{ii,1}.Distance)/1000);
+                    node(jj).resample(pose(1), pose(2), double(msgs{ii,1}.Distance)/1000);
                     found = 1;
                 end
             end
@@ -73,17 +73,19 @@ for ii = 1:length(msgs)
     
     % Render environment
     %======================================================================
-    clf;
-    hold on;
-    xlim([-5 5]); ylim([-5 5]);
-    xlabel('meters'); ylabel('meters');
-    drawRobot(pose(1), pose(2), pose(3), 0.25);
-%     if(~isempty(node))
-%         for jj = 1:length(node)
-%             node(jj).plotParticles();
-%         end
-%     end
-    pause(0.1);
+    if(mod(ii, 100) == 0) % render every 100 messages
+        clf;
+        hold on;
+        xlim([-5 5]); ylim([-5 5]);
+        xlabel('meters'); ylabel('meters');
+        drawRobot(pose(1), pose(2), pose(3), 0.25);
+        if(~isempty(node))
+            for jj = 1:length(node)
+                node(jj).plotParticles();
+            end
+        end
+        pause(0.001);
+    end
     % End render environment
     %----------------------------------------------------------------------
 end

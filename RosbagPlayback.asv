@@ -56,12 +56,6 @@ for ii = 1:length(msgs)
             %                 node = [node, nodepf(msgs{ii,1}.Device, 100, pose(1), pose(2), msgs{ii,1}.Distance/100)];
             %             end
         end
-        
-        if(~isempty(node))
-            for jj = 1:length(node)
-                node(jj).plotParticles();
-            end
-        end
     end
     
     if(contains(msgs{ii,1}.MessageType,'Odom'))
@@ -77,17 +71,20 @@ for ii = 1:length(msgs)
         pose = [position(1), position(2), wrapTo360(rad2deg(orientation(1)))];
     end
     
-    % Re
+    % Render environment
     %======================================================================
-    % if current message is odom, plot robot position
     clf;
-    drawRobot(pose(1), pose(2), 0.5);
-     if(~isempty(node))
+    hold on;
+    xlim([-5 5]); ylim([-5 5]);
+    xlabel('meters'); ylabel('meters');
+    drawRobot(pose(1), pose(2), pose(3), 0.25);
+    if(~isempty(node))
         for jj = 1:length(node)
             node(jj).plotParticles();
         end
     end
-    % End plot odom
+    pause(0.001);
+    % End render environment
     %----------------------------------------------------------------------
 end
 % End rosbag playback
