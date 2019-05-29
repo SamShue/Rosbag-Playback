@@ -1,4 +1,4 @@
 
 *.asv
 *.jar
-/matlab_gen/*
+/custom_messages/matlab_gen/*
