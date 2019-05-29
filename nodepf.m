@@ -7,9 +7,8 @@ classdef nodepf < handle
         particles;
         color = 'red';
         addr;
-        lastRobotPosition;
-        minResampleDistance = 0.5;
-        
+        minResampleDistance = 0.25;
+        lastMeasurement;
         nodeStdDev_m = 0.5;
     end
     
@@ -39,7 +38,7 @@ classdef nodepf < handle
             end
             
             obj.particles = particles;
-            obj.lastRobotPosition = [robotPosX, robotPosY];
+            obj.lastMeasurement = range_m;
         end
         
         function predict(obj, motion)
@@ -48,7 +47,7 @@ classdef nodepf < handle
         
         function resample(obj, robotPosX, robotPosY, range_m)
             % Check to see if robot has moved enough to warrant resampling
-            if(abs(norm([robotPosX, robotPosY] - obj.lastRobotPosition)) > obj.minResampleDistance)
+            if(abs(obj.lastMeasurement - range_m) > obj.minResampleDistance)
                 % Get expected range values for each particle
                 err = zeros(length(obj.numParticles));
                 for ii = 1:obj.numParticles
@@ -72,7 +71,7 @@ classdef nodepf < handle
                 % Replace old particle set
                 obj.particles = newParticles;
                 % Update last robot position
-                obj.lastRobotPosition = [robotPosX, robotPosY];
+                obj.lastMeasurement = range_m;
             end
         end
         
