@@ -5,7 +5,7 @@ classdef nodepf < handle
     properties
         numParticles;
         particles;
-        color = 'red';
+        color = 'green';
         addr;
         minResampleDistance = 0.25;
         lastMeasurement;
@@ -49,13 +49,13 @@ classdef nodepf < handle
             % Check to see if robot has moved enough to warrant resampling
             if(abs(obj.lastMeasurement - range_m) > obj.minResampleDistance)
                 % Get expected range values for each particle
-                err = zeros(length(obj.numParticles));
-                for ii = 1:obj.numParticles
-                    x = obj.particles(ii,1) - robotPosX;
-                    y = obj.particles(ii,2) - robotPosY;
-                    expectedRange = sqrt(x^2 + y^2);
-                    err(ii) = abs(expectedRange - range_m);
-                end
+%                 err = zeros(length(obj.numParticles));
+%                 for ii = 1:obj.numParticles
+                    x = obj.particles(:,1) - robotPosX;
+                    y = obj.particles(:,2) - robotPosY;
+                    expectedRange = sqrt(x.^2 + y.^2);
+                    err = abs(expectedRange - range_m);
+%                 end
                 
                 norm_err = abs(err - max(err));
                 weights = norm_err./sum(norm_err);

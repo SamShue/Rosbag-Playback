@@ -3,7 +3,8 @@ clear all;
 close all;
 
 % Rosbag file name
-filename = '2019-05-21-18-51-45.bag';
+% filename = 'rosbags/2019-05-21/2019-05-21-18-51-45.bag';
+filename = 'rosbags/2019-06-04/2019-06-04-16-26-32.bag';
 
 % Import custom ROS messages
 %==========================================================================
@@ -30,6 +31,7 @@ msgTable = bag.MessageList;
 numParticles = 100;
 odomPose = [0,0,0];
 node = [];
+robot = robotpf(numParticles, 0, 0, 0);
 
 % Rosbag playback
 %==========================================================================
@@ -40,8 +42,10 @@ for ii = 1:length(msgs)
     messageTimeStamp = table2array(msgTable(ii,1));
     
     if(contains(msgs{ii,1}.MessageType, 'DeviceRange'))
+        % convert range from mm to m
+        dist_m = double(msgs{ii,1}.Distance)/1000;
         if(isempty(node))
-            node = [node, nodepf(msgs{ii,1}.Device, numParticles, odomPose(1), odomPose(2), double(msgs{ii,1}.Distance)/1000)];
+            node = [node, nodepf(msgs{ii,1}.Device, numParticles, odomPose(1), odomPose(2), dist_m)];
         else
             found = 0;
             for jj = 1:length(node)
@@ -54,9 +58,13 @@ for ii = 1:length(msgs)
             
             if(found == 0)
                 % no matching addr found, append new pf
-                node = [node, nodepf(msgs{ii,1}.Device, numParticles, odomPose(1), odomPose(2), double(msgs{ii,1}.Distance)/1000)];
+                node = [node, nodepf(msgs{ii,1}.Device, numParticles, odomPose(1), odomPose(2), dist_m)];
             end
         end
+    end
+    
+    if(contains(msgs{ii,1}.MessageType,'Twist'))
+        
     end
     
     if(contains(msgs{ii,1}.MessageType,'Odom'))
@@ -74,20 +82,20 @@ for ii = 1:length(msgs)
     
     % Render environment
     %======================================================================
-    if(mod(ii, 500) == 0) % render every 100 messages
-        clf;
-        hold on;
-        title(sprintf('Iteration %d', ii));
-        xlim([-5 5]); ylim([-5 5]);
-        xlabel('meters'); ylabel('meters');
-        drawRobot(odomPose(1), odomPose(2), odomPose(3), 0.25);
-        if(~isempty(node))
-            for jj = 1:length(node)
-                node(jj).plotParticles();
-            end
-        end
-        pause(0.001);
-    end
+%     if(mod(ii, 500) == 0) % render every 100 messages
+%         clf;
+%         hold on;
+%         title(sprintf('Iteration %d', ii));
+%         xlim([-5 5]); ylim([-5 5]);
+%         xlabel('meters'); ylabel('meters');
+%         drawRobot(odomPose(1), odomPose(2), odomPose(3), 0.25);
+%         if(~isempty(node))
+%             for jj = 1:length(node)
+%                 node(jj).plotParticles();
+%             end
+%         end
+%         pause(0.001);
+%     end
     % End render environment
     %----------------------------------------------------------------------
 end
@@ -96,6 +104,16 @@ end
 
 % Plot results
 %==========================================================================
+hold on;
+xlim([-5 5]); ylim([-5 5]);
+xlabel('meters'); ylabel('meters');
+drawRobot(odomPose(1), odomPose(2), odomPose(3), 0.25);
+if(~isempty(node))
+    for jj = 1:length(node)
+        node(jj).plotParticles();
+    end
+end
+
 plotOdomPath(bag);
 plotTwistPath(bag);
 % End plot results
