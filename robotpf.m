@@ -41,7 +41,30 @@ classdef robotpf < handle
         end
         
         function resample(obj, landmarkRanges, landmarkPositions)
+            err = zeros(length(obj.particles),1);
+            for ii = 1:landmarkRanges
+                % Get expected range values for each particle
+                x = obj.particles(:,1) - landmarkPositions(ii,1);
+                y = obj.particles(:,2) - landmarkPositions(ii,2);
+                expectedRange = sqrt(x.^2 + y.^2);
+                err = err + abs(expectedRange - landmarkRanges);
+            end
 
+            norm_err = abs(err - max(err));
+            weights = norm_err./sum(norm_err);
+
+            newParticles = zeros(obj.numParticles, 2);
+            for ii = 1:obj.numParticles
+                newParticles(ii,:) = obj.particles(RandFromDist(weights),:);
+                % Add noise to resampled particles
+                newParticles(ii,1) = newParticles(ii,1) + normrnd(0, 0.025);
+                newParticles(ii,2) = newParticles(ii,2) + normrnd(0, 0.025);
+            end
+
+            % Replace old particle set
+            obj.particles = newParticles;
+            % Update last robot position
+            obj.lastMeasurement = landmarkRanges;
         end
     end
 end

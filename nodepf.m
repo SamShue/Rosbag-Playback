@@ -23,6 +23,12 @@ classdef nodepf < handle
                 obj.color = 'red';
             elseif(strcmp(addr, '26935'))
                 obj.color = 'yellow';
+            elseif(strcmp(addr, '28162'))
+                obj.color = 'magenta';
+            elseif(strcmp(addr, '27006'))
+                obj.color = 'cyan';
+            elseif(strcmp(addr, '26944'))
+                obj.color = 'green';
             end
             
             obj.numParticles = numParticles;
@@ -49,13 +55,10 @@ classdef nodepf < handle
             % Check to see if robot has moved enough to warrant resampling
             if(abs(obj.lastMeasurement - range_m) > obj.minResampleDistance)
                 % Get expected range values for each particle
-%                 err = zeros(length(obj.numParticles));
-%                 for ii = 1:obj.numParticles
-                    x = obj.particles(:,1) - robotPosX;
-                    y = obj.particles(:,2) - robotPosY;
-                    expectedRange = sqrt(x.^2 + y.^2);
-                    err = abs(expectedRange - range_m);
-%                 end
+                x = obj.particles(:,1) - robotPosX;
+                y = obj.particles(:,2) - robotPosY;
+                expectedRange = sqrt(x.^2 + y.^2);
+                err = abs(expectedRange - range_m);
                 
                 norm_err = abs(err - max(err));
                 weights = norm_err./sum(norm_err);

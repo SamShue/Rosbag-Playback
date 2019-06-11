@@ -4,7 +4,7 @@ close all;
 
 % Rosbag file name
 % filename = 'rosbags/2019-05-21/2019-05-21-18-51-45.bag';
-filename = 'rosbags/2019-06-04/2019-06-04-16-26-32.bag';
+filename = 'rosbags/2019-06-04/2019-06-04-16-20-51.bag';
 
 % Import custom ROS messages
 %==========================================================================
