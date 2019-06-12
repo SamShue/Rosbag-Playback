@@ -96,6 +96,10 @@ classdef nodepf < handle
             end
             
         end
+        
+        function pos = getPosition(obj)
+            pos = mean(obj.particles);
+        end
     end
 end
 

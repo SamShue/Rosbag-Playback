@@ -5,9 +5,12 @@ classdef robotpf < handle
     properties
         numParticles;
         particles;
+        
+        linearNoise = 0.025;
+        angularNoise = 0.025;
+        
+        landmarkIds;
         lastMeasurement;
-        linearNoise = 0.001;
-        angularNoise = 0.001;
     end
     
     methods
@@ -49,18 +52,20 @@ classdef robotpf < handle
         
         function resample(obj, landmarkRanges, landmarkPositions)
             err = zeros(length(obj.particles),1);
-            for ii = 1:landmarkRanges
-                % Get expected range values for each particle
-                x = obj.particles(:,1) - landmarkPositions(ii,1);
-                y = obj.particles(:,2) - landmarkPositions(ii,2);
-                expectedRange = sqrt(x.^2 + y.^2);
-                err = err + abs(expectedRange - landmarkRanges);
+            for ii = 1:length(landmarkRanges)
+                if(landmarkRanges(ii) > 0)
+                    % Get expected range values for each particle
+                    x = obj.particles(:,1) - landmarkPositions(ii,1);
+                    y = obj.particles(:,2) - landmarkPositions(ii,2);
+                    expectedRange = sqrt(x.^2 + y.^2);
+                    err = err + abs(expectedRange - landmarkRanges(ii));
+                end
             end
             
             norm_err = abs(err - max(err));
             weights = norm_err./sum(norm_err);
             
-            newParticles = zeros(obj.numParticles, 2);
+            newParticles = zeros(obj.numParticles, 3);
             for ii = 1:obj.numParticles
                 newParticles(ii,:) = obj.particles(RandFromDist(weights),:);
                 % Add noise to resampled particles
@@ -77,6 +82,10 @@ classdef robotpf < handle
             for ii = 1:obj.numParticles
                 scatter(obj.particles(ii,1), obj.particles(ii,2), 'o', 'black');
             end
+        end
+        
+        function pos = getPosition(obj)
+            pos = mean(obj.particles(:,1:2));
         end
         
     end

@@ -34,6 +34,7 @@ odomPose = [0,0,0];
 node = [];
 robot = robotpf(numParticles, 0, 0, 0);
 twist_dt = 0;
+measurements = [];
 
 % Rosbag playback
 %==========================================================================
@@ -42,21 +43,30 @@ for ii = 1:length(msgs)
     if(contains(msgs{ii,1}.MessageType, 'DeviceRange'))
         % convert range from mm to m
         dist_m = double(msgs{ii,1}.Distance)/1000;
+        pose = robot.getPosition();
         if(isempty(node))
-            node = [node, nodepf(msgs{ii,1}.Device, numParticles, odomPose(1), odomPose(2), dist_m)];
+            node = [node, nodepf(msgs{ii,1}.Device, numParticles, pose(1), pose(2), dist_m)];
         else
             found = 0;
             for jj = 1:length(node)
                 if(strcmp(node(jj).addr, msgs{ii,1}.Device))
                     % Update existing pf
-                    node(jj).resample(odomPose(1), odomPose(2), double(msgs{ii,1}.Distance)/1000);
+                    
+                    node(jj).resample(pose(1), pose(2), dist_m);
                     found = 1;
+                    
+                    % If converged, add to vector for resampling robot
+                    if(node(jj).isConverged())
+                        %robot.resample(dist_m, node(jj).getPosition())
+                        measurements(jj) = dist_m;
+                        positions(jj,:) = node(jj).getPosition();
+                    end
                 end
             end
             
             if(found == 0)
                 % no matching addr found, append new pf
-                node = [node, nodepf(msgs{ii,1}.Device, numParticles, odomPose(1), odomPose(2), dist_m)];
+                node = [node, nodepf(msgs{ii,1}.Device, numParticles, pose(1), pose(2), dist_m)];
             end
         end
     end
@@ -67,6 +77,11 @@ for ii = 1:length(msgs)
         else
             robot.predict(msgs{ii,1}.Linear.X, msgs{ii,1}.Angular.Z, timeStamps(ii) - twist_dt);
             twist_dt = timeStamps(ii);
+        end
+        
+        if(length(measurements) >= 3)
+            robot.resample(measurements, positions);
+            measurements = []; positions = [];
         end
     end
     
