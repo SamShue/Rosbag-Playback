@@ -5,6 +5,9 @@ classdef robotpf < handle
     properties
         numParticles;
         particles;
+        lastMeasurement;
+        linearNoise = 0.001;
+        angularNoise = 0.001;
     end
     
     methods
@@ -26,16 +29,20 @@ classdef robotpf < handle
                 c = cos(theta);
                 s_th = sin(theta+w*d_t);
                 c_th = cos(theta+w*d_t);
+                
+                n_l = normrnd(0, obj.linearNoise);
+                n_w = normrnd(0, obj.angularNoise);
+                
                 if(w<.05)
                     %basically robot is going straight
-                    obj.particles(ii,1) = obj.particles(ii,1) + (v*c_th)*d_t;
-                    obj.particles(ii,2) = obj.particles(ii,2) + (v*s_th)*d_t;
-                    obj.particles(ii,3) = obj.particles(ii,3) + w*d_t;
+                    obj.particles(ii,1) = obj.particles(ii,1) + (v*c_th)*d_t + n_l;
+                    obj.particles(ii,2) = obj.particles(ii,2) + (v*s_th)*d_t + n_l;
+                    obj.particles(ii,3) = obj.particles(ii,3) + w*d_t + n_w;
                 else
                     %robot is turning
-                    obj.particles(ii,1) = obj.particles(ii,1) + (-r*s)+(r*s_th);
-                    obj.particles(ii,2) = obj.particles(ii,2) +( r*c)-(r*c_th);
-                    obj.particles(ii,3) = obj.particles(ii,3) + w*d_t;
+                    obj.particles(ii,1) = obj.particles(ii,1) + (-r*s)+(r*s_th) + n_l;
+                    obj.particles(ii,2) = obj.particles(ii,2) +( r*c)-(r*c_th) + n_l;
+                    obj.particles(ii,3) = obj.particles(ii,3) + w*d_t + n_w;
                 end
             end
         end
@@ -49,10 +56,10 @@ classdef robotpf < handle
                 expectedRange = sqrt(x.^2 + y.^2);
                 err = err + abs(expectedRange - landmarkRanges);
             end
-
+            
             norm_err = abs(err - max(err));
             weights = norm_err./sum(norm_err);
-
+            
             newParticles = zeros(obj.numParticles, 2);
             for ii = 1:obj.numParticles
                 newParticles(ii,:) = obj.particles(RandFromDist(weights),:);
@@ -60,12 +67,18 @@ classdef robotpf < handle
                 newParticles(ii,1) = newParticles(ii,1) + normrnd(0, 0.025);
                 newParticles(ii,2) = newParticles(ii,2) + normrnd(0, 0.025);
             end
-
+            
             % Replace old particle set
             obj.particles = newParticles;
-            % Update last robot position
-            obj.lastMeasurement = landmarkRanges;
         end
+        
+        function plotParticles(obj)
+            hold on;
+            for ii = 1:obj.numParticles
+                scatter(obj.particles(ii,1), obj.particles(ii,2), 'o', 'black');
+            end
+        end
+        
     end
 end
 

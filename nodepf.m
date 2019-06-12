@@ -10,6 +10,7 @@ classdef nodepf < handle
         minResampleDistance = 0.25;
         lastMeasurement;
         nodeStdDev_m = 0.5;
+        convergenceThreshold = 0.5;
     end
     
     methods
@@ -83,6 +84,17 @@ classdef nodepf < handle
             for ii = 1:obj.numParticles
                 scatter(obj.particles(ii,1), obj.particles(ii,2), 'o', obj.color);
             end
+        end
+        
+        function converged = isConverged(obj)
+            stdDev = std(obj.particles(:,1));
+            stdDev = (stdDev + std(obj.particles(:,2)))/2;
+            if(stdDev < obj.convergenceThreshold)
+                converged = 1;
+            else
+                converged = 0;
+            end
+            
         end
     end
 end

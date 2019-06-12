@@ -27,20 +27,18 @@ bag = rosbag(filename);
 % parse messages from bag
 msgs = readMessages(bag);
 msgTable = bag.MessageList;
+timeStamps = table2array(msgTable(:,1));
 
 numParticles = 100;
 odomPose = [0,0,0];
 node = [];
 robot = robotpf(numParticles, 0, 0, 0);
+twist_dt = 0;
 
 % Rosbag playback
 %==========================================================================
 % iterate through all messages in bag
-for ii = 1:length(msgs)
-    % get timestamp of current message (not included in msg struct for some
-    % reason)
-    messageTimeStamp = table2array(msgTable(ii,1));
-    
+for ii = 1:length(msgs) 
     if(contains(msgs{ii,1}.MessageType, 'DeviceRange'))
         % convert range from mm to m
         dist_m = double(msgs{ii,1}.Distance)/1000;
@@ -64,7 +62,12 @@ for ii = 1:length(msgs)
     end
     
     if(contains(msgs{ii,1}.MessageType,'Twist'))
-        
+        if(twist_dt == 0)
+            twist_dt = timeStamps(ii);
+        else
+            robot.predict(msgs{ii,1}.Linear.X, msgs{ii,1}.Angular.Z, timeStamps(ii) - twist_dt);
+            twist_dt = timeStamps(ii);
+        end
     end
     
     if(contains(msgs{ii,1}.MessageType,'Odom'))
@@ -82,20 +85,20 @@ for ii = 1:length(msgs)
     
     % Render environment
     %======================================================================
-%     if(mod(ii, 500) == 0) % render every 100 messages
-%         clf;
-%         hold on;
-%         title(sprintf('Iteration %d', ii));
-%         xlim([-5 5]); ylim([-5 5]);
-%         xlabel('meters'); ylabel('meters');
-%         drawRobot(odomPose(1), odomPose(2), odomPose(3), 0.25);
-%         if(~isempty(node))
-%             for jj = 1:length(node)
-%                 node(jj).plotParticles();
-%             end
-%         end
-%         pause(0.001);
-%     end
+    %     if(mod(ii, 500) == 0) % render every 100 messages
+    %         clf;
+    %         hold on;
+    %         title(sprintf('Iteration %d', ii));
+    %         xlim([-5 5]); ylim([-5 5]);
+    %         xlabel('meters'); ylabel('meters');
+    %         drawRobot(odomPose(1), odomPose(2), odomPose(3), 0.25);
+    %         if(~isempty(node))
+    %             for jj = 1:length(node)
+    %                 node(jj).plotParticles();
+    %             end
+    %         end
+    %         pause(0.001);
+    %     end
     % End render environment
     %----------------------------------------------------------------------
 end
@@ -113,6 +116,7 @@ if(~isempty(node))
         node(jj).plotParticles();
     end
 end
+robot.plotParticles();
 
 plotOdomPath(bag);
 plotTwistPath(bag);
