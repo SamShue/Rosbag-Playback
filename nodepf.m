@@ -10,7 +10,7 @@ classdef nodepf < handle
         minResampleDistance = 0.25;
         lastMeasurement;
         nodeStdDev_m = 0.5;
-        convergenceThreshold = 0.5;
+        convergenceThreshold = 1;
     end
     
     methods
