@@ -3,8 +3,8 @@ clear all;
 close all;
 
 % Rosbag file name
-filename = 'rosbags/2019-05-21/2019-05-21-18-51-45.bag';
-% filename = 'rosbags/2019-06-04/2019-06-04-16-20-51.bag';
+% filename = 'rosbags/2019-05-21/2019-05-21-18-51-45.bag';
+filename = 'rosbags/2019-06-04/2019-06-04-16-20-51.bag';
 
 % Import custom ROS messages
 %==========================================================================
@@ -30,7 +30,7 @@ msgTable = bag.MessageList;
 timeStamps = table2array(msgTable(:,1));
 clearvars msgTable;
 
-numParticles = 100;
+numParticles = 500;
 odomPose = [0,0,0];
 node = [];
 robot = robotpf(numParticles, 0, 0, 0);
