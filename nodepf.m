@@ -7,9 +7,9 @@ classdef nodepf < handle
         particles;
         color = 'green';
         addr;
-        minResampleDistance = 0.25;
+        minResampleDistance = 0.125;
         lastMeasurement;
-        nodeStdDev_m = 0.5;
+        nodeStdDev_m = 0.25;
         convergenceThreshold = 0.5;
     end
     
@@ -68,8 +68,8 @@ classdef nodepf < handle
                 for ii = 1:obj.numParticles
                     newParticles(ii,:) = obj.particles(RandFromDist(weights),:);
                     % Add noise to resampled particles
-                    newParticles(ii,1) = newParticles(ii,1) + normrnd(0, 0.1);
-                    newParticles(ii,2) = newParticles(ii,2) + normrnd(0, 0.1);
+                    newParticles(ii,1) = newParticles(ii,1) + normrnd(0, 0.05);
+                    newParticles(ii,2) = newParticles(ii,2) + normrnd(0, 0.05);
                 end
                 
                 % Replace old particle set
