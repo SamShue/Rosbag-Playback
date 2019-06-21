@@ -7,7 +7,7 @@ classdef robotmappf < handle
         particles;
         
         linearNoise = 0.05;
-        angularNoise = 0.1;
+        angularNoise = 0.05;
         measurementNoise = 0.001;
         
         landmarkIds = [];
@@ -41,7 +41,7 @@ classdef robotmappf < handle
                     %basically robot is going straight
                     obj.particles(ii,1) = obj.particles(ii,1) + (v*c_th)*d_t + n_l;
                     obj.particles(ii,2) = obj.particles(ii,2) + (v*s_th)*d_t + n_l;
-                    obj.particles(ii,3) = obj.particles(ii,3) + w*d_t;
+                    obj.particles(ii,3) = obj.particles(ii,3) + w*d_t + n_w;
                 else
                     %robot is turning
                     obj.particles(ii,1) = obj.particles(ii,1) + (-r*s)+(r*s_th) + n_l;
@@ -84,6 +84,10 @@ classdef robotmappf < handle
         
         function pos = getPosition(obj)
             pos = mean(obj.particles(:,1:2));
+        end
+        
+        function pose = getPose(obj)
+            pose = mean(obj.particles(:,1:3));
         end
         
         function addLandmarkParticles(obj, landmarkPositions, landmarkId)

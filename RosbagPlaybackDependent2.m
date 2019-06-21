@@ -107,7 +107,7 @@ for ii = 1:length(msgs)
         orientation(4) = msgs{ii,1}.Pose.Pose.Orientation.Z;
         % convert quaternions to eulter angels (quat2eul format: WXYZ -> ZXY)
         orientation = quat2eul(orientation);
-        odomPose = [position(1), position(2), orientation(1)];
+        odomPose = [position(1), position(2), wrapTo360(rad2deg(orientation(1)))];
     end
     
     % Render environment
@@ -138,11 +138,14 @@ end
 hold on;
 xlim([-5 5]); ylim([-5 5]);
 xlabel('meters'); ylabel('meters');
-drawRobot(odomPose(1), odomPose(2), odomPose(3), 0.25);
+
 robot.plotParticles();
 
 plotOdomPath(bag);
 plotTwistPath(bag);
 plot(posePath(:,1), posePath(:,2), 'black');
+drawRobot(odomPose(1), odomPose(2), odomPose(3), 0.25, 'gray');
+pose = robot.getPose();
+drawRobot(pose(1), pose(2), rad2deg(pose(3)), 0.25);
 % End plot results
 %--------------------------------------------------------------------------
