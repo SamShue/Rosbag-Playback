@@ -4,7 +4,7 @@ Export-Package: pozyx_ros_examples;version="0.1.0";uses:="org.ros.inte
 Bundle-Version: 0.1.0
 Tool: Bnd-2.1.0.20130426-122213
 Bundle-Name: pozyx_ros_examples
-Bnd-LastModified: 1558645222247
+Bnd-LastModified: 1574549775057
 Created-By: 1.7.0_60 (Oracle Corporation)
 Bundle-ManifestVersion: 2
 Bundle-SymbolicName: org.ros.rosjava_messages.pozyx_ros_examples
