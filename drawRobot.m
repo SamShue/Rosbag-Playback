@@ -36,5 +36,4 @@ function drawRobot(x, y, theta, radius, color)
             plot(x_a(:,1),x_a(:,2),color);
         end
     end
-    hold off;
 end
