@@ -2,6 +2,13 @@ clc;
 clear all;
 close all;
 
+% Plot config parameters
+mapMinX = -5;   % Min value for x axis on plot (m)
+mapMinY = -5;   % Min value for y axis on plot (m)
+mapMaxX = 5;    % Max value for x axis on plot (m)
+mapMaxY = 5;    % Max value for y axis on plot (m)
+robotRenderSize = 0.25; % Size of robot rendered in plot (m)
+
 % Rosbag file name
 filename = 'rosbags/2019-06-04/2019-06-04-16-08-11.bag';
 
@@ -42,10 +49,10 @@ for ii = 1:length(msgs)
         clf;
         hold on;
         title(sprintf('Iteration %d', ii));
-        xlim([-5 5]); ylim([-5 5]);
+        xlim([mapMinX mapMaxX]); ylim([mapMinY mapMaxY]);
         xlabel('meters'); ylabel('meters');
         if(exist('odomPose'))
-            drawRobot(odomPose(1), odomPose(2), odomPose(3), 0.25);
+            drawRobot(odomPose(1), odomPose(2), odomPose(3), robotRenderSize);
         end
         pause(0.001);
     end
@@ -58,9 +65,9 @@ end
 % Plot results
 %==========================================================================
 hold on;
-xlim([-5 5]); ylim([-5 5]);
+xlim([mapMinX mapMaxX]); ylim([mapMinY mapMaxY]);
 xlabel('meters'); ylabel('meters');
-drawRobot(odomPose(1), odomPose(2), odomPose(3), 0.25);
+drawRobot(odomPose(1), odomPose(2), odomPose(3), robotRenderSize);
 
 plotOdomPath(bag);
 plotTwistPath(bag);
