@@ -98,16 +98,7 @@ for ii = 1:length(msgs)
     end
     
     if(contains(msgs{ii,1}.MessageType,'Odom'))
-        % get pose from odom message
-        position(1) = msgs{ii,1}.Pose.Pose.Position.X;
-        position(2) = msgs{ii,1}.Pose.Pose.Position.Y;
-        orientation(1) = msgs{ii,1}.Pose.Pose.Orientation.W;
-        orientation(2) = msgs{ii,1}.Pose.Pose.Orientation.X;
-        orientation(3) = msgs{ii,1}.Pose.Pose.Orientation.Y;
-        orientation(4) = msgs{ii,1}.Pose.Pose.Orientation.Z;
-        % convert quaternions to eulter angels (quat2eul format: WXYZ -> ZXY)
-        orientation = quat2eul(orientation);
-        odomPose = [position(1), position(2), wrapTo360(rad2deg(orientation(1)))];
+        odomPose = parseOdomMessage2D(msgs{ii,1});
     end
     
     % Render environment

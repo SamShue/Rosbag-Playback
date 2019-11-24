@@ -3,12 +3,8 @@ clear all;
 close all;
 
 % Rosbag file name
-<<<<<<< HEAD:RosbagPlaybackBlank.m
-filename = 'rosbags/2019-06-04/2019-06-04-16-08-11.bag';
-=======
 % filename = 'rosbags/2019-05-21/2019-05-21-18-51-45.bag';
 filename = 'rosbags/2019-06-04/2019-06-04-16-20-51.bag';
->>>>>>> parent of 9961dff... Removed posyx specific files:RosbagPlaybackDependent.m
 
 % Import custom ROS messages
 %==========================================================================
