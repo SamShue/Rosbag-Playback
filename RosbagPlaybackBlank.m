@@ -3,7 +3,6 @@ clear all;
 close all;
 
 % Rosbag file name
-% filename = 'rosbags/2019-05-21/2019-05-21-18-51-45.bag';
 filename = 'rosbags/2019-06-04/2019-06-04-16-20-51.bag';
 
 % Import custom ROS messages
@@ -28,72 +27,11 @@ bag = rosbag(filename);
 msgs = readMessages(bag);
 msgTable = bag.MessageList;
 timeStamps = table2array(msgTable(:,1));
-clearvars msgTable;
-
-numParticles = 500;
-odomPose = [0,0,0];
-node = [];
-robot = robotpf(numParticles, 0, 0, 0);
-twist_dt = 0;
-measurements = [];
-posePath = [];
-robotResampleCount = 0;
 
 % Rosbag playback
 %==========================================================================
 % iterate through all messages in bag
-for ii = 1:length(msgs)
-    if(contains(msgs{ii,1}.MessageType, 'DeviceRange'))
-        % convert range from mm to m
-        dist_m = double(msgs{ii,1}.Distance)/1000;
-        pose = robot.getPosition();
-        if(isempty(node))
-            node = [node, nodepf(msgs{ii,1}.Device, numParticles, pose(1), pose(2), dist_m)];
-        else
-            found = 0;
-            for jj = 1:length(node)
-                if(strcmp(node(jj).addr, msgs{ii,1}.Device))
-                    % Update existing pf
-                    
-                    node(jj).resample(pose(1), pose(2), dist_m);
-                    found = 1;
-                    
-                    % If converged, add to vector for resampling robot
-                    if(node(jj).isConverged())
-                        %robot.resample(dist_m, node(jj).getPosition())
-                        measurements(jj) = dist_m;
-                        positions(jj,:) = node(jj).getPosition();
-                        posePath = [posePath; pose];
-                    end
-                end
-            end
-            
-            if(found == 0)
-                % no matching addr found, append new pf
-                node = [node, nodepf(msgs{ii,1}.Device, numParticles, pose(1), pose(2), dist_m)];
-            end
-        end
-    end
-    
-    if(contains(msgs{ii,1}.MessageType,'Twist'))
-        if(twist_dt == 0)
-            twist_dt = timeStamps(ii);
-        else
-            robot.predict(msgs{ii,1}.Linear.X, msgs{ii,1}.Angular.Z, timeStamps(ii) - twist_dt);
-            twist_dt = timeStamps(ii);
-        end
-        
-        if(robotResampleCount > 10)
-            if(sum(measurements > 0) >= 3)
-                robot.resample(measurements, positions);
-                measurements = []; positions = [];
-                robotResampleCount = 0;
-            end
-        else
-            robotResampleCount = robotResampleCount + 1;
-        end
-    end
-    
+for ii = 1:length(msgs) 
     if(contains(msgs{ii,1}.MessageType,'Odom'))
         % get pose from odom message
         position(1) = msgs{ii,1}.Pose.Pose.Position.X;
@@ -135,15 +73,8 @@ hold on;
 xlim([-5 5]); ylim([-5 5]);
 xlabel('meters'); ylabel('meters');
 drawRobot(odomPose(1), odomPose(2), odomPose(3), 0.25);
-if(~isempty(node))
-    for jj = 1:length(node)
-        node(jj).plotParticles();
-    end
-end
-robot.plotParticles();
 
 plotOdomPath(bag);
 plotTwistPath(bag);
-plot(posePath(:,1), posePath(:,2), 'black');
 % End plot results
 %--------------------------------------------------------------------------
