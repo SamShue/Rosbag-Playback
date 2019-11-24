@@ -47,20 +47,15 @@ for ii = 1:length(msgs)
     
     % Render environment
     %======================================================================
-    %     if(mod(ii, 500) == 0) % render every 100 messages
-    %         clf;
-    %         hold on;
-    %         title(sprintf('Iteration %d', ii));
-    %         xlim([-5 5]); ylim([-5 5]);
-    %         xlabel('meters'); ylabel('meters');
-    %         drawRobot(odomPose(1), odomPose(2), odomPose(3), 0.25);
-    %         if(~isempty(node))
-    %             for jj = 1:length(node)
-    %                 node(jj).plotParticles();
-    %             end
-    %         end
-    %         pause(0.001);
-    %     end
+    if(mod(ii, 500) == 0) % render every 100 messages
+        clf;
+        hold on;
+        title(sprintf('Iteration %d', ii));
+        xlim([-5 5]); ylim([-5 5]);
+        xlabel('meters'); ylabel('meters');
+        drawRobot(odomPose(1), odomPose(2), odomPose(3), 0.25);
+        pause(0.001);
+    end
     % End render environment
     %----------------------------------------------------------------------
 end
