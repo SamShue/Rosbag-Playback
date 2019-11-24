@@ -3,7 +3,7 @@ clear all;
 close all;
 
 % Rosbag file name
-filename = 'rosbags/2019-06-04/2019-06-04-16-20-51.bag';
+filename = 'rosbags/2019-06-04/2019-06-04-16-08-11.bag';
 
 % Import custom ROS messages
 %==========================================================================
@@ -33,16 +33,7 @@ timeStamps = table2array(msgTable(:,1));
 % iterate through all messages in bag
 for ii = 1:length(msgs) 
     if(contains(msgs{ii,1}.MessageType,'Odom'))
-        % get pose from odom message
-        position(1) = msgs{ii,1}.Pose.Pose.Position.X;
-        position(2) = msgs{ii,1}.Pose.Pose.Position.Y;
-        orientation(1) = msgs{ii,1}.Pose.Pose.Orientation.W;
-        orientation(2) = msgs{ii,1}.Pose.Pose.Orientation.X;
-        orientation(3) = msgs{ii,1}.Pose.Pose.Orientation.Y;
-        orientation(4) = msgs{ii,1}.Pose.Pose.Orientation.Z;
-        % convert quaternions to eulter angels (quat2eul format: WXYZ -> ZXY)
-        orientation = quat2eul(orientation);
-        odomPose = [position(1), position(2), wrapTo360(rad2deg(orientation(1)))];
+        odomPose = parseOdomMessage2D(msgs{ii,1});
     end
     
     % Render environment
@@ -53,7 +44,9 @@ for ii = 1:length(msgs)
         title(sprintf('Iteration %d', ii));
         xlim([-5 5]); ylim([-5 5]);
         xlabel('meters'); ylabel('meters');
-        drawRobot(odomPose(1), odomPose(2), odomPose(3), 0.25);
+        if(exist('odomPose'))
+            drawRobot(odomPose(1), odomPose(2), odomPose(3), 0.25);
+        end
         pause(0.001);
     end
     % End render environment
